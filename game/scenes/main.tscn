@@ -1,0 +1,354 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/main.gd" id="Main"]
+[ext_resource type="Script" path="res://game/presentation/wall_segment.gd" id="Wall"]
+[ext_resource type="PackedScene" path="res://game/scenes/player.tscn" id="Player"]
+[ext_resource type="PackedScene" path="res://game/scenes/guest.tscn" id="Guest"]
+[ext_resource type="PackedScene" path="res://game/scenes/interaction.tscn" id="Interaction"]
+[ext_resource type="Script" path="res://game/presentation/ambient_audio.gd" id="Audio"]
+[ext_resource type="Shader" path="res://game/presentation/retro.gdshader" id="Retro"]
+[ext_resource type="Shader" path="res://game/presentation/floor.gdshader" id="FloorShader"]
+[ext_resource type="PackedScene" path="res://assets/vendor/kenney-furniture/bedSingle.glb" id="Bed"]
+[ext_resource type="PackedScene" path="res://assets/vendor/kenney-furniture/chair.glb" id="Chair"]
+[ext_resource type="PackedScene" path="res://assets/vendor/kenney-furniture/cabinetBed.glb" id="Cabinet"]
+[ext_resource type="PackedScene" path="res://assets/vendor/kenney-furniture/radio.glb" id="Radio"]
+[ext_resource type="PackedScene" path="res://assets/vendor/kenney-furniture/lampSquareFloor.glb" id="Lamp"]
+[ext_resource type="PackedScene" path="res://assets/vendor/kenney-furniture/bookcaseClosedWide.glb" id="Bookcase"]
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 1
+background_color = Color(0.024, 0.03, 0.029, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.46, 0.54, 0.5, 1)
+ambient_light_energy = 0.13
+reflected_light_source = 2
+
+[sub_resource type="ShaderMaterial" id="FloorMaterial"]
+shader = ExtResource("FloorShader")
+[sub_resource type="BoxMesh" id="FloorMesh"]
+size = Vector3(15, 0.2, 18)
+material = SubResource("FloorMaterial")
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(15, 0.2, 18)
+[sub_resource type="StandardMaterial3D" id="CeilingMaterial"]
+albedo_color = Color(0.38, 0.4, 0.34, 1)
+roughness = 1.0
+[sub_resource type="BoxMesh" id="CeilingMesh"]
+size = Vector3(15, 0.2, 18)
+material = SubResource("CeilingMaterial")
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.16, 0.21, 0.19, 1)
+roughness = 0.85
+[sub_resource type="BoxMesh" id="BreakerMesh"]
+size = Vector3(0.18, 0.65, 0.45)
+material = SubResource("Metal")
+[sub_resource type="StandardMaterial3D" id="Paper"]
+albedo_color = Color(0.68, 0.61, 0.39, 1)
+roughness = 1.0
+[sub_resource type="BoxMesh" id="Fuse"]
+size = Vector3(0.1, 0.2, 0.1)
+material = SubResource("Paper")
+[sub_resource type="BoxMesh" id="BoardMesh"]
+size = Vector3(0.08, 0.85, 0.75)
+material = SubResource("Paper")
+[sub_resource type="BoxShape3D" id="BedShape"]
+size = Vector3(1.142, 0.75, 2.25)
+[sub_resource type="BoxShape3D" id="CabinetShape"]
+size = Vector3(0.931, 0.8162, 0.7525)
+[sub_resource type="BoxMesh" id="PipeMesh"]
+size = Vector3(0.055, 0.055, 17)
+material = SubResource("Metal")
+[sub_resource type="StandardMaterial3D" id="BulbMaterial"]
+albedo_color = Color(0.85, 0.76, 0.48, 1)
+emission_enabled = true
+emission = Color(0.7, 0.62, 0.32, 1)
+[sub_resource type="BoxMesh" id="BulbMesh"]
+size = Vector3(0.55, 0.05, 0.18)
+material = SubResource("BulbMaterial")
+[sub_resource type="ShaderMaterial" id="RetroMaterial"]
+shader = ExtResource("Retro")
+[sub_resource type="StyleBoxFlat" id="HudPanel"]
+bg_color = Color(0.025, 0.035, 0.03, 0.83)
+content_margin_left = 14.0
+content_margin_right = 14.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+[sub_resource type="BoxMesh" id="DoorMesh"]
+size = Vector3(1.25, 2.4, 0.1)
+material = SubResource("Metal")
+
+[node name="Ward" type="Node3D"]
+script = ExtResource("Main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+position = Vector3(0.5, -0.1, -0.5)
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("FloorMesh")
+[node name="Shape" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+[node name="Ceiling" type="MeshInstance3D" parent="."]
+position = Vector3(0.5, 3.2, -0.5)
+mesh = SubResource("CeilingMesh")
+
+[node name="Walls" type="Node3D" parent="."]
+[node name="HallWestNorth" type="StaticBody3D" parent="Walls"]
+position = Vector3(-2, 0, -3.5)
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("Wall")
+dimensions = Vector3(11, 3.1, 0.18)
+[node name="HallWestSouth" type="StaticBody3D" parent="Walls"]
+position = Vector3(-2, 0, 6.5)
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("Wall")
+dimensions = Vector3(3, 3.1, 0.18)
+[node name="HallEastNorth" type="StaticBody3D" parent="Walls"]
+position = Vector3(2, 0, -7.5)
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("Wall")
+dimensions = Vector3(3, 3.1, 0.18)
+[node name="HallEastSouth" type="StaticBody3D" parent="Walls"]
+position = Vector3(2, 0, 2.25)
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("Wall")
+dimensions = Vector3(11.5, 3.1, 0.18)
+[node name="HallBack" type="StaticBody3D" parent="Walls"]
+position = Vector3(0, 0, -9)
+script = ExtResource("Wall")
+dimensions = Vector3(4, 3.1, 0.18)
+[node name="South" type="StaticBody3D" parent="Walls"]
+position = Vector3(-2.5, 0, 8)
+script = ExtResource("Wall")
+dimensions = Vector3(9, 3.1, 0.18)
+[node name="PostWest" type="StaticBody3D" parent="Walls"]
+position = Vector3(-7, 0, 5)
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("Wall")
+dimensions = Vector3(6, 3.1, 0.18)
+[node name="PostNorth" type="StaticBody3D" parent="Walls"]
+position = Vector3(-4.5, 0, 2)
+script = ExtResource("Wall")
+dimensions = Vector3(5, 3.1, 0.18)
+[node name="RoomEast" type="StaticBody3D" parent="Walls"]
+position = Vector3(8, 0, -5)
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("Wall")
+dimensions = Vector3(6, 3.1, 0.18)
+[node name="RoomNorth" type="StaticBody3D" parent="Walls"]
+position = Vector3(5, 0, -8)
+script = ExtResource("Wall")
+dimensions = Vector3(6, 3.1, 0.18)
+[node name="RoomSouth" type="StaticBody3D" parent="Walls"]
+position = Vector3(5, 0, -2)
+script = ExtResource("Wall")
+dimensions = Vector3(6, 3.1, 0.18)
+
+[node name="PipeLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-1.78, 2.7, -0.5)
+mesh = SubResource("PipeMesh")
+[node name="PipeRight" type="MeshInstance3D" parent="."]
+position = Vector3(1.78, 2.7, -0.5)
+mesh = SubResource("PipeMesh")
+[node name="ArchiveDoor" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.2, -8.82)
+mesh = SubResource("DoorMesh")
+[node name="ArchiveLabel" type="Label3D" parent="."]
+position = Vector3(0, 2.65, -8.7)
+text = "АРХИВ / ЗАКРЫТО"
+font_size = 40
+pixel_size = 0.003
+
+[node name="PostLight" type="OmniLight3D" parent="."]
+position = Vector3(-4.4, 2.6, 4.4)
+light_color = Color(1, 0.79, 0.5, 1)
+light_energy = 1.9
+omni_range = 6.0
+shadow_enabled = true
+[node name="Bulb" type="MeshInstance3D" parent="PostLight"]
+position = Vector3(0, 0.3, 0)
+mesh = SubResource("BulbMesh")
+[node name="CorridorLight" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.65, -1.5)
+light_color = Color(0.63, 0.77, 0.65, 1)
+light_energy = 1.4
+omni_range = 7.0
+shadow_enabled = true
+[node name="Bulb" type="MeshInstance3D" parent="CorridorLight"]
+position = Vector3(0, 0.25, 0)
+mesh = SubResource("BulbMesh")
+[node name="BedsideLight" type="OmniLight3D" parent="."]
+position = Vector3(5.9, 1.7, -3.5)
+light_color = Color(0.96, 0.75, 0.42, 1)
+light_energy = 1.4
+omni_range = 4.8
+shadow_enabled = false
+[node name="Fixture" parent="BedsideLight" instance=ExtResource("Lamp")]
+position = Vector3(-0.12, -1.7, 0.12)
+scale = Vector3(2, 2, 2)
+
+[node name="Player" parent="." instance=ExtResource("Player")]
+position = Vector3(0, 0.02, 6.2)
+[node name="AmbientAudio" type="Node3D" parent="."]
+script = ExtResource("Audio")
+
+[node name="Guest" parent="." instance=ExtResource("Guest")]
+position = Vector3(6.3, 0, -5.7)
+rotation = Vector3(0, 1.5707963, 0)
+[node name="ResidentChair" parent="." instance=ExtResource("Chair")]
+position = Vector3(6.1, 0, -5.9)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(2, 2, 2)
+[node name="Bed" parent="." instance=ExtResource("Bed")]
+position = Vector3(5.759, 0, -5.575)
+scale = Vector3(2, 2, 2)
+[node name="BedCollision" type="StaticBody3D" parent="."]
+position = Vector3(7.1, 0.375, -6.7)
+[node name="Shape" type="CollisionShape3D" parent="BedCollision"]
+shape = SubResource("BedShape")
+[node name="Cabinet" parent="." instance=ExtResource("Cabinet")]
+position = Vector3(3.6695, 0, -6.85875)
+scale = Vector3(3.5, 3.5, 3.5)
+[node name="CabinetCollision" type="StaticBody3D" parent="."]
+position = Vector3(4.1, 0.4081, -7.2)
+[node name="Shape" type="CollisionShape3D" parent="CabinetCollision"]
+shape = SubResource("CabinetShape")
+[node name="RadioModel" parent="." instance=ExtResource("Radio")]
+position = Vector3(3.86375, 0.82, -7.126875)
+scale = Vector3(1.5, 1.5, 1.5)
+[node name="PostCabinet" parent="." instance=ExtResource("Cabinet")]
+position = Vector3(-4.8305, 0, 3.04125)
+scale = Vector3(3.5, 3.5, 3.5)
+[node name="Bookcase" parent="." instance=ExtResource("Bookcase")]
+position = Vector3(-4.9, 0, 7.3)
+rotation = Vector3(0, 3.1415927, 0)
+scale = Vector3(2, 2, 2)
+[node name="PortableLamp" parent="." instance=ExtResource("Lamp")]
+position = Vector3(-5.92, 0, 3.22)
+scale = Vector3(2, 2, 2)
+[node name="FuseMesh" type="MeshInstance3D" parent="."]
+position = Vector3(-4.4, 0.92, 2.7)
+mesh = SubResource("Fuse")
+[node name="BreakerMesh" type="MeshInstance3D" parent="."]
+position = Vector3(-1.8, 1.45, 0)
+mesh = SubResource("BreakerMesh")
+[node name="Board" type="MeshInstance3D" parent="."]
+position = Vector3(-6.85, 1.45, 5.4)
+mesh = SubResource("BoardMesh")
+
+[node name="LampPickup" parent="." instance=ExtResource("Interaction")]
+position = Vector3(-5.8, 0.95, 3.1)
+action = 0
+[node name="FusePickup" parent="." instance=ExtResource("Interaction")]
+position = Vector3(-4.4, 0.92, 2.7)
+action = 1
+[node name="Breaker" parent="." instance=ExtResource("Interaction")]
+position = Vector3(-1.65, 1.45, 0)
+action = 2
+[node name="LampSocket" parent="." instance=ExtResource("Interaction")]
+position = Vector3(5.9, 1.0, -3.5)
+action = 3
+[node name="RadioSwitch" parent="." instance=ExtResource("Interaction")]
+position = Vector3(4.1, 1.0, -7.1)
+action = 4
+[node name="Contact" parent="." instance=ExtResource("Interaction")]
+position = Vector3(5.98, 1.35, -5.7)
+action = 5
+[node name="Finish" parent="." instance=ExtResource("Interaction")]
+position = Vector3(-6.65, 1.45, 5.4)
+action = 7
+
+[node name="PostSign" type="Label3D" parent="."]
+position = Vector3(-1.86, 2.45, 3.4)
+rotation = Vector3(0, 1.5707963, 0)
+text = "ПОСТ / СНАБЖЕНИЕ"
+font_size = 36
+pixel_size = 0.004
+[node name="WardSign" type="Label3D" parent="."]
+position = Vector3(1.86, 2.45, -4.6)
+rotation = Vector3(0, -1.5707963, 0)
+text = "027 / ЖДУЩАЯ"
+font_size = 36
+pixel_size = 0.004
+[node name="SocketLabel" type="Label3D" parent="."]
+position = Vector3(5.9, 1.8, -3.5)
+billboard = 1
+text = "МЕСТО ДЛЯ ЛАМПЫ"
+font_size = 28
+pixel_size = 0.003
+[node name="BoardLabel" type="Label3D" parent="."]
+position = Vector3(-6.65, 2.08, 5.4)
+billboard = 1
+text = "ЖУРНАЛ СМЕНЫ"
+font_size = 30
+pixel_size = 0.003
+
+[node name="Retro" type="CanvasLayer" parent="."]
+layer = 1
+[node name="Effect" type="ColorRect" parent="Retro"]
+material = SubResource("RetroMaterial")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 2
+[node name="Status" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 880.0
+offset_bottom = 125.0
+theme_override_colors/font_color = Color(0.85, 0.89, 0.79, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("HudPanel")
+[node name="Crosshair" type="Label" parent="HUD"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -6.0
+offset_top = -13.0
+offset_right = 6.0
+offset_bottom = 13.0
+text = "+"
+horizontal_alignment = 1
+[node name="Prompt" type="Label" parent="HUD"]
+anchor_left = 0.5
+anchor_top = 0.72
+anchor_right = 0.5
+anchor_bottom = 0.72
+offset_left = -520.0
+offset_right = 520.0
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+[node name="Message" type="Label" parent="HUD"]
+anchor_left = 0.5
+anchor_top = 0.81
+anchor_right = 0.5
+anchor_bottom = 0.81
+offset_left = -600.0
+offset_right = 600.0
+theme_override_colors/font_color = Color(0.91, 0.8, 0.54, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+[node name="Inventory" type="Label" parent="HUD"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -72.0
+offset_right = 600.0
+offset_bottom = -44.0
+theme_override_font_sizes/font_size = 18
+[node name="Controls" type="Label" parent="HUD"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -38.0
+offset_right = 1240.0
+offset_bottom = -12.0
+theme_override_font_sizes/font_size = 15
+text = "WASD — идти    Мышь — взгляд    E — действие    R — обещание    F8 — эффекты    F9 — звук    Esc — курсор    F6 — новая смена"

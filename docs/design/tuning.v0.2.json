@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "design_version": "0.2",
+  "status": "proposal_not_runtime",
+  "runtime_consumed": false,
+  "baseline_commit": "39b90c3d08b13d7891a71ced6a63f6792e961b08",
+  "canonical_document": "05-case-001.md",
+  "session": {
+    "target_min_players": 1,
+    "target_max_players": 4,
+    "vertical_slice_required_players": [1, 2],
+    "inventory_slots": 3,
+    "join_during_case": false,
+    "host_migration": false
+  },
+  "case_001_tutorial": {
+    "resident_id": "027",
+    "interaction_range_metres": 2.5,
+    "contact_range_metres": 2.8,
+    "grace_seconds": 20.0,
+    "warning_seconds": 12.0,
+    "promise_seconds": 45.0,
+    "test_cycle_seconds": 16.0,
+    "settled_observation_seconds": 10.0,
+    "solo_round_trip_budget_seconds": 20.0,
+    "safety_margin_seconds": 9.0,
+    "notes": "Starting hypotheses only. Measure the real traversal route, then migrate into typed Resources in a separate implementation task. Never auto-overwrite the existing 6/5/18 bootstrap profile."
+  }
+}
