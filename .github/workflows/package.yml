@@ -1,0 +1,105 @@
+name: Package desktop clients
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, stable, 'feature/**']
+    paths:
+      - '.github/workflows/package.yml'
+      - 'export_presets.cfg'
+      - 'tools/package.py'
+      - 'tools/dev.py'
+      - 'tools/export_notices.gd*'
+      - 'tools/distribution/**'
+      - 'tests/test_packaging.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guests-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Record source
+        run: |
+          mkdir -p artifacts
+          git rev-parse HEAD > artifacts/commit.txt
+          git archive --format=zip --output=artifacts/source.zip HEAD
+      - name: Check packaging helpers
+        run: python3 -m unittest discover -s tests -p test_packaging.py
+      - name: Install pinned engine and check the game
+        run: |
+          python3 tools/dev.py setup
+          python3 tools/dev.py check
+      - name: Export and package Linux and Universal 2 macOS on Linux
+        run: python3 tools/package.py all
+      - name: Retain standalone packages and exact-source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: guests-packages-${{ github.sha }}
+          path: |
+            build/GUESTS-macOS.zip
+            build/GUESTS-macOS.zip.sha256
+            build/GUESTS-linux-x86_64.tar.gz
+            build/GUESTS-linux-x86_64.tar.gz.sha256
+            artifacts/
+          retention-days: 14
+          if-no-files-found: error
+
+  macos-smoke:
+    needs: linux-build
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: guests-packages-${{ github.sha }}
+          path: distribution
+      - name: Check checksum and extract without losing executable permissions
+        run: |
+          cd distribution/build
+          shasum -a 256 -c GUESTS-macOS.zip.sha256
+          ditto -x -k GUESTS-macOS.zip ../../macos-stage
+      - name: Verify ad-hoc signature and launch the Linux-built app natively
+        shell: bash
+        run: |
+          mkdir -p macos-evidence
+          python3 - <<'PY'
+          import json, pathlib, platform, plistlib, subprocess
+          app = pathlib.Path('macos-stage/GUESTS.app').resolve()
+          info = plistlib.loads((app / 'Contents/Info.plist').read_bytes())
+          binary = app / 'Contents/MacOS' / info['CFBundleExecutable']
+          signature = subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], text=True, capture_output=True)
+          pathlib.Path('macos-evidence/codesign.log').write_text(signature.stdout + signature.stderr)
+          if signature.returncode:
+              raise SystemExit('Ad-hoc signature verification failed')
+          run = subprocess.run([str(binary), '--headless', '--quit-after', '60'], text=True, capture_output=True, timeout=45)
+          log = run.stdout + run.stderr
+          pathlib.Path('macos-evidence/native-launch.log').write_text(log)
+          print(log)
+          result = {'host': platform.platform(), 'architecture': platform.machine(),
+                    'macos': platform.mac_ver()[0], 'ad_hoc_signature': 'PASS',
+                    'native_headless_exit': run.returncode,
+                    'notarized': False, 'interactive_playtest': 'NOT RUN'}
+          pathlib.Path('macos-evidence/result.json').write_text(json.dumps(result, indent=2))
+          if run.returncode or 'ERROR:' in log or 'SCRIPT ERROR:' in log:
+              raise SystemExit('Native macOS launch failed')
+          print('GUESTS_MACOS_NATIVE_OK')
+          PY
+      - name: Keep native macOS evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: guests-macos-smoke-${{ github.sha }}
+          path: macos-evidence/
+          retention-days: 14
+          if-no-files-found: warn
