@@ -1,4 +1,5 @@
 """No downloads, engine or Apple tools needed for packaging helper regressions."""
+import configparser
 import plistlib
 from pathlib import Path
 import struct
@@ -12,6 +13,11 @@ import package
 
 
 class PackagingTests(unittest.TestCase):
+    def test_macos_category_uses_exporter_label_not_prefixed_uti(self):
+        presets = configparser.ConfigParser()
+        presets.read(Path(__file__).resolve().parents[1] / 'export_presets.cfg')
+        self.assertEqual(presets['preset.1.options']['application/app_category'], '"Games"')
+
     def test_rejects_path_traversal(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
