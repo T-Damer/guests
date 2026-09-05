@@ -6,6 +6,11 @@ on:
     branches: [main, stable, 'feature/**']
     paths:
       - '.github/workflows/package.yml'
+      - '.godot-version'
+      - 'project.godot'
+      - 'game/**'
+      - 'content/**'
+      - 'assets/**'
       - 'export_presets.cfg'
       - 'tools/package.py'
       - 'tools/dev.py'

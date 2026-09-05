@@ -2,7 +2,7 @@
 
 Status: implementation / verify exact commit in Package desktop clients workflow.
 Scope: packaging only; no gameplay changes, additional branch, merge or release promotion.
-Owned paths: export_presets.cfg, tools/package.py,
+Owned paths: project.godot (dual texture import only), export_presets.cfg, tools/package.py,
 tools/export_notices.gd + UID, tools/distribution/, tests/test_packaging.py,
 .github/workflows/package.yml, README.md and this contract.
 
@@ -19,6 +19,9 @@ A dirty checkout may not be labelled with a clean commit SHA. The raw export is
 checked for architecture, app metadata, resources and executable bits. Native
 macOS signature verification and headless execution are a separate CI job; never
 attribute a Linux-only structural check to a real Mac launch or interactive test.
+
+Godot requires ETC2/ASTC imports for Apple Silicon and S3TC/BPTC for Intel.
+Both project import options are enabled; the game renderer and art are unchanged.
 
 ## Checks
 
