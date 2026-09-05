@@ -1,0 +1,47 @@
+name: Toolchain cache
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/bootstrap']
+    paths: ['.godot-version', '.github/workflows/toolchain.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolchain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cache:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Download and verify pinned official Godot binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '\r\n' < .godot-version)"
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          mkdir -p cache
+          cd cache
+          BASE="https://github.com/godotengine/godot-builds/releases/download/${VERSION}-stable"
+          FILE="Godot_v${VERSION}-stable_linux.x86_64.zip"
+          curl --fail --location --retry 3 "$BASE/$FILE" -o "$FILE"
+          curl --fail --location --retry 3 "$BASE/SHA512-SUMS.txt" -o SHA512-SUMS.txt
+          grep " $FILE$" SHA512-SUMS.txt > engine.sha512
+          sha512sum --check engine.sha512
+      - name: Download CC0 art source for intake (not automatically trusted or installed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 'https://kenney.nl/media/pages/assets/furniture-kit/440e0608a4-1677580847/kenney_furniture-kit.zip' -o cache/kenney_furniture-kit.zip
+          sha256sum cache/kenney_furniture-kit.zip > cache/art-intake.sha256
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bootstrap-toolchain
+          path: cache/
+          retention-days: 3
+          if-no-files-found: error
