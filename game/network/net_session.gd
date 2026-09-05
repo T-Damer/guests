@@ -11,8 +11,10 @@ var state: ShiftState = ShiftState.new()
 var validate_reach: Callable
 var _windows: Dictionary = {}
 var _counts: Dictionary = {}
+var _closing: bool = false
 
 func host(port: int = GameIds.DEFAULT_PORT) -> Error:
+	_closing = false
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 	var error: Error = peer.create_server(port, GameIds.MAX_PLAYERS - 1)
 	if error != OK:
@@ -23,17 +25,23 @@ func host(port: int = GameIds.DEFAULT_PORT) -> Error:
 	return OK
 
 func join(address: String, port: int = GameIds.DEFAULT_PORT) -> Error:
+	_closing = false
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 	var error: Error = peer.create_client(address, port)
 	if error != OK:
 		return error
 	multiplayer.multiplayer_peer = peer
-	multiplayer.connection_failed.connect(func() -> void: connection_failed.emit())
-	multiplayer.server_disconnected.connect(func() -> void: connection_failed.emit())
+	multiplayer.connection_failed.connect(_on_connection_lost)
+	multiplayer.server_disconnected.connect(_on_connection_lost)
 	return OK
 
 func close() -> void:
+	_closing = true
 	multiplayer.multiplayer_peer.close()
+
+func _on_connection_lost() -> void:
+	if not _closing:
+		connection_failed.emit()
 
 func submit(action: int) -> void:
 	if multiplayer.is_server():

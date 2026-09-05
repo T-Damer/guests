@@ -109,4 +109,12 @@ func _test_transport_defaults() -> void:
 	session.validate_reach = func(_actor: int, _action: int) -> bool: return false
 	session.submit(GameIds.Action.PICK_LAMP)
 	expect(session.state.lamp_available, "unreachable target rejected")
+	var losses: Array[bool] = []
+	session.connection_failed.connect(func() -> void: losses.append(true))
+	session._on_connection_lost()
+	expect(losses.size() == 1, "unexpected disconnect is reported")
+	losses.clear()
+	session.close()
+	session._on_connection_lost()
+	expect(losses.is_empty(), "intentional local close is not connection failure")
 	session.free()

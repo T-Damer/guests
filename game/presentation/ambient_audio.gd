@@ -58,3 +58,9 @@ func _tone(frequency: float, seconds: float, loop: bool) -> AudioStreamWAV:
 		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		stream.loop_end = count
 	return stream
+
+func _exit_tree() -> void:
+	for player: AudioStreamPlayer3D in [hum, radio, warning]:
+		if is_instance_valid(player):
+			player.stop()
+			player.stream = null

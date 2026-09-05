@@ -66,15 +66,13 @@ func _target() -> InteractionPoint:
 	return hit["collider"] as InteractionPoint
 
 func _interact() -> void:
-	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		return
 	var target: InteractionPoint = _target()
 	if target != null:
 		_apply(target.action)
 
 func _promise() -> void:
 	var target: InteractionPoint = _target()
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and target != null and target.action == GameIds.Action.GREET:
+	if target != null and target.action == GameIds.Action.GREET:
 		_apply(GameIds.Action.PROMISE)
 
 func _apply(action: int) -> void:
@@ -127,7 +125,17 @@ func _capture(directory: String) -> void:
 	await get_tree().create_timer(CAPTURE_SETTLE_SECONDS).timeout
 	await RenderingServer.frame_post_draw
 	var second: Error = get_viewport().get_texture().get_image().save_png(absolute.path_join("guest-warning.png"))
-	if first != OK or second != OK:
+	state.apply(GameIds.Action.PICK_FUSE)
+	state.apply(GameIds.Action.INSTALL_FUSE)
+	state.apply(GameIds.Action.PICK_LAMP)
+	state.apply(GameIds.Action.PLACE_LAMP)
+	state.apply(GameIds.Action.GREET)
+	effects.visible = false
+	_sync_view()
+	await get_tree().create_timer(CAPTURE_SETTLE_SECONDS).timeout
+	await RenderingServer.frame_post_draw
+	var third: Error = get_viewport().get_texture().get_image().save_png(absolute.path_join("resident-effects-off.png"))
+	if first != OK or second != OK or third != OK:
 		printerr("GUESTS_CAPTURE_FAILED")
 		get_tree().quit(1)
 		return

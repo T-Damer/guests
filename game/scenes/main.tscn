@@ -52,9 +52,9 @@ material = SubResource("Paper")
 size = Vector3(0.08, 0.85, 0.75)
 material = SubResource("Paper")
 [sub_resource type="BoxShape3D" id="BedShape"]
-size = Vector3(1.1, 0.6, 2.1)
+size = Vector3(1.142, 0.75, 2.25)
 [sub_resource type="BoxShape3D" id="CabinetShape"]
-size = Vector3(0.75, 0.85, 0.7)
+size = Vector3(0.931, 0.8162, 0.7525)
 [sub_resource type="BoxMesh" id="PipeMesh"]
 size = Vector3(0.055, 0.055, 17)
 material = SubResource("Metal")
@@ -185,7 +185,7 @@ light_energy = 1.4
 omni_range = 4.8
 shadow_enabled = false
 [node name="Fixture" parent="BedsideLight" instance=ExtResource("Lamp")]
-position = Vector3(0, -1.7, 0)
+position = Vector3(-0.12, -1.7, 0.12)
 scale = Vector3(2, 2, 2)
 
 [node name="Player" parent="." instance=ExtResource("Player")]
@@ -197,37 +197,38 @@ script = ExtResource("Audio")
 position = Vector3(6.3, 0, -5.7)
 rotation = Vector3(0, 1.5707963, 0)
 [node name="ResidentChair" parent="." instance=ExtResource("Chair")]
-position = Vector3(6.3, 0, -5.7)
-rotation = Vector3(0, 1.5707963, 0)
+position = Vector3(6.1, 0, -5.9)
+rotation = Vector3(0, -1.5707963, 0)
 scale = Vector3(2, 2, 2)
 [node name="Bed" parent="." instance=ExtResource("Bed")]
-position = Vector3(6.8, 0, -7.3)
+position = Vector3(5.759, 0, -5.575)
 scale = Vector3(2, 2, 2)
 [node name="BedCollision" type="StaticBody3D" parent="."]
-position = Vector3(6.8, 0.3, -7.0)
+position = Vector3(7.1, 0.375, -6.7)
 [node name="Shape" type="CollisionShape3D" parent="BedCollision"]
 shape = SubResource("BedShape")
 [node name="Cabinet" parent="." instance=ExtResource("Cabinet")]
-position = Vector3(4.1, 0, -7.2)
-scale = Vector3(2, 2, 2)
+position = Vector3(3.6695, 0, -6.85875)
+scale = Vector3(3.5, 3.5, 3.5)
 [node name="CabinetCollision" type="StaticBody3D" parent="."]
-position = Vector3(4.1, 0.425, -7.2)
+position = Vector3(4.1, 0.4081, -7.2)
 [node name="Shape" type="CollisionShape3D" parent="CabinetCollision"]
 shape = SubResource("CabinetShape")
 [node name="RadioModel" parent="." instance=ExtResource("Radio")]
-position = Vector3(4.1, 0.86, -7.1)
-scale = Vector3(2, 2, 2)
+position = Vector3(3.86375, 0.82, -7.126875)
+scale = Vector3(1.5, 1.5, 1.5)
 [node name="PostCabinet" parent="." instance=ExtResource("Cabinet")]
-position = Vector3(-4.4, 0, 2.7)
-scale = Vector3(2, 2, 2)
+position = Vector3(-4.8305, 0, 3.04125)
+scale = Vector3(3.5, 3.5, 3.5)
 [node name="Bookcase" parent="." instance=ExtResource("Bookcase")]
-position = Vector3(-6.4, 0, 7.2)
+position = Vector3(-4.9, 0, 7.3)
+rotation = Vector3(0, 3.1415927, 0)
 scale = Vector3(2, 2, 2)
 [node name="PortableLamp" parent="." instance=ExtResource("Lamp")]
-position = Vector3(-5.8, 0, 3.1)
+position = Vector3(-5.92, 0, 3.22)
 scale = Vector3(2, 2, 2)
 [node name="FuseMesh" type="MeshInstance3D" parent="."]
-position = Vector3(-4.4, 0.98, 2.7)
+position = Vector3(-4.4, 0.92, 2.7)
 mesh = SubResource("Fuse")
 [node name="BreakerMesh" type="MeshInstance3D" parent="."]
 position = Vector3(-1.8, 1.45, 0)
@@ -240,7 +241,7 @@ mesh = SubResource("BoardMesh")
 position = Vector3(-5.8, 0.95, 3.1)
 action = 0
 [node name="FusePickup" parent="." instance=ExtResource("Interaction")]
-position = Vector3(-4.4, 1.02, 2.7)
+position = Vector3(-4.4, 0.92, 2.7)
 action = 1
 [node name="Breaker" parent="." instance=ExtResource("Interaction")]
 position = Vector3(-1.65, 1.45, 0)
@@ -249,7 +250,7 @@ action = 2
 position = Vector3(5.9, 1.0, -3.5)
 action = 3
 [node name="RadioSwitch" parent="." instance=ExtResource("Interaction")]
-position = Vector3(4.1, 1.1, -6.95)
+position = Vector3(4.1, 1.0, -7.1)
 action = 4
 [node name="Contact" parent="." instance=ExtResource("Interaction")]
 position = Vector3(5.98, 1.35, -5.7)

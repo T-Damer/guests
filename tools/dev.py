@@ -137,6 +137,7 @@ def test() -> None:
     subprocess.run([sys.executable, str(ROOT / "tools/check_repo.py")], check=True, cwd=ROOT)
     run_engine(["--headless", "--script", "res://tests/run.gd"], "rules.log", "GUESTS_RULES_OK")
     network_test()
+    run_engine(["--headless", "--script", "res://tests/scene_contract.gd"], "scene-contract.log", "GUESTS_SCENE_OK")
     run_engine(["--headless", "--quit-after", "45"], "scene-smoke.log")
 
 

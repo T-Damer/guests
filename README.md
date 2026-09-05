@@ -36,8 +36,8 @@ python3 tools/dev.py run
 |---|---|
 | `python3 tools/dev.py setup` | Зафиксированный Godot с проверкой официальной контрольной суммы |
 | `python3 tools/dev.py prepare` | Проверенные ассеты и импорт проекта |
-| `python3 tools/dev.py check` | Импорт, структура, правила, два ENet-процесса, headless-запуск сцены |
-| `python3 tools/dev.py capture` | Две графические фикстуры и журнал в `artifacts/` |
+| `python3 tools/dev.py check` | Импорт, структура, правила, взаимодействия в сцене, два ENet-процесса, headless-запуск |
+| `python3 tools/dev.py capture` | Три графические фикстуры (включая эффекты off) и журнал в `artifacts/` |
 | `python3 tools/dev.py export` | Linux debug-клиент и запуск экспортированной игры |
 | `python3 tools/dev.py export --release` | Linux release-клиент; не публикация и не продвижение ветки |
 

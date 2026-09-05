@@ -25,3 +25,6 @@ State the purpose, scale in metres, maximum extent, polygon/material/texture bud
 Godot scenes own placement and static collision proxies. Visual instances may be uniformly scaled; physical shapes use explicit sizes. Capture both the normal and maximum-stretch poses. Check doors, ceiling, shadows, readability with F8 off, and whether a teammate can identify the warning. Inspect the actual exported build.
 
 No custom font files are required; the UI uses the engine's built-in font. Audio licensing and listening approval are separate from graphical approval.
+
+## Import-pivot correction
+The selected GLBs use corner/offset origins. Instance positions and collision proxies in `main.tscn` are adjusted to their measured imported bounds. Do not assume every downloaded prop has a centered origin or identical scale. The cabinet now supports the radio and the chair faces the same direction as the resident.

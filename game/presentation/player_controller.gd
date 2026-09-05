@@ -39,8 +39,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key: InputEventKey = event as InputEventKey
 		match key.physical_keycode:
-			KEY_E: interact_requested.emit()
-			KEY_R: promise_requested.emit()
+			KEY_E:
+				if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+					interact_requested.emit()
+			KEY_R:
+				if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+					promise_requested.emit()
 			KEY_F8: effects_requested.emit()
 			KEY_F9: mute_requested.emit()
 			KEY_F6: get_tree().reload_current_scene()

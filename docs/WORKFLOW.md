@@ -33,3 +33,6 @@ A green import is not a playable game. A headless scene launch is not a visual r
 Resolve existing licensed assets first. For unique art, use Blender -> GLB with source `.blend` or reproducible generator and a recorded tool version. An MCP bridge may assist an agent but is not the sole record of edits and is not a required dependency. This bootstrap does not install a Blender/Godot MCP server.
 
 Install no arbitrary plugins or credentials. CI is read-only for repository contents, uses pinned action revisions and publishes only sources/builds/test artifacts. Local debug fixtures are gated by debug builds, never callable through a network command.
+
+## Bootstrap test caveats
+The scene-interaction fixture places actors at named test positions, then exercises real ray queries and intent signal wiring. It is not a walking/navigation or human keyboard playtest. Linux headless/Dummy shutdown currently reports retained WAV/playback objects; record this warning as an open audio-lifecycle issue rather than claiming a warning-free build. `.gd.uid` and shader UID sidecars belong in Git; `.godot/` import caches and generated vendor output do not.

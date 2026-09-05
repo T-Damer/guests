@@ -24,4 +24,5 @@ Read `README.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md` and the active task b
 ## Human / AI handoff
 The AI implements, tests, documents deltas and proposes a PR. A human can edit ordinary scenes and resources, chooses artistic direction and approves merges/releases. Preserve editor-authored work; keep `.godot/`, binaries and temporary captures out of Git.
 
-Repository is in bootstrap. Referenced documents and commands are delivered in the same bootstrap PR; do not treat this initial tooling commit as a playable game.
+## Standard commands
+`python3 tools/dev.py check` runs import, structural, rule, scene-interaction and two-process ENet checks. `capture` renders fixtures; `export` builds and smoke-launches Linux. Current task: `docs/tasks/001-bootstrap.md`; proposed next task: `002-coop.md`. The main scene is currently solo; the separate transport probe does not prove full playable coop.
