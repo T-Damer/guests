@@ -1,49 +1,61 @@
-# Design contract — first care shift
+# ГОСТИ / GUESTS — дизайн-библия v0.2
 
-## Identity
+Дата: 6 сентября 2026. Владелец направления: автор проекта. Язык дизайна — русский; идентификаторы кода — английские.
 
-A penal night-shift crew services an anomalous residential institute. Mutated residents retain habits, needs and fragments of their lives. The fantasy is competent, frightening care under constraints, not extermination. The fictional fungal syndrome is not a depiction of real fungal disease or psychiatric patients.
+**Это спецификация целевой игры, а не перечень реализованных возможностей.** Основание текущего состояния — коммит `39b90c3d08b13d7891a71ced6a63f6792e961b08`. Добавление документов не включает новые механики в сборку. Рабочие названия, сюжетные имена и числовой баланс предложены для прототипирования; их нельзя выдавать за уже одобренный финальный канон.
 
-The institution and resident histories are original. Lost Archive / K.O.N.T.U.R. is an atmospheric reference, not licensed canon to copy. Use the working title GUESTS until naming is decided.
+## Игра одним абзацем
 
-## Loop
+Вы живёте на служебном этаже огромного жилого комбината и отрабатываете взыскание в выездной бригаде. За привычными дверями соседних мегахрущёвок остаются люди, чьи тела и поведение изменены вымышленной грибной аномалией. Сотрудники получают дело, собирают инструменты, встречаются в лифте и отправляются на вызов. Нужно разобраться в потребностях жильца, подготовить обстановку, выполнить работу и вернуться домой. Оружия нет; есть договорённости, предметы, наблюдение, укрытия и помощь товарища. Главный вопрос не «как убить монстра», а «как выполнить работу и не оставить человека в опасном состоянии».
 
-Receive a compact work order -> inspect what changed -> prepare light/equipment/contact -> perform care -> address consequences -> decide whether to investigate further -> return to a genuinely safe staff post.
+## Обязательные опоры направления
 
-Target a 15–25 minute eventual shift, but the bootstrap is intentionally shorter. Every later task should change the situation, not merely fill a progress bar. Knowledge of a resident stays reliable; circumstances combine in new ways. Do not invert learned rules randomly.
+| ID | Опора | Проверяемое следствие |
+|---|---|---|
+| P01 | Кооператив — базовый продукт, одиночка — полноценный режим | Первая демонстрационная смена принимается только после прохождения одним и двумя игроками; цель — 1–4 |
+| P02 | Дом — эмоциональный и механический контраст | Общий этаж безопасен, хранит вещи и последствия дел; это не ещё одна арена |
+| P03 | Тварь когда-то была и отчасти остаётся человеком | У каждого номера есть имя, привычка, потребность и возможная помощь игрокам |
+| P04 | Правила устойчивы, обстоятельства меняются | Нельзя случайно отменять выученный способ спасения ради скримера |
+| P05 | Масштаб города больше масштаба симуляции | Огромные фасады и шахты, но компактные авторские игровые участки |
+| P06 | Свет создаёт возможность действовать | Полезны маршруты, наблюдение и подготовка; универсального светового щита нет |
+| P07 | Страх возникает из решений | На одном деле доступны минимум два осмысленных способа справиться с проблемой |
+| P08 | ИИ делает основную производственную работу | Файлы редактируемы, сборка повторяема, критерии приёмки исполнимы без догадок |
 
-The bootstrap work order is: restore power, bring the portable lamp, introduce yourself, establish radio support, return to the logbook. It demonstrates state changes and recoverable mistakes, not final repeatability or narrative depth.
+От VHOLUME берём художественный ориентир бетонного города и бюрократического абсурда, но не персонажей, сюжет, уровни, интерфейс, музыку или паркур. Официальное описание референса: [источник V01](SOURCES.md). Присланный пользователем скриншот рассматривается отдельно как визуальный референс, без утверждения о его происхождении.
 
-## Resident 027: The Waiting One
+## Карта документов: читать по задаче, а не всё сразу
 
-Human need: know someone will return. Initial state is calm; no hidden punishment timer before first contact. After introduction, a nearby visible caregiver or a powered radio supports calm. Without support, a grace interval precedes a warning; an unanswered warning escalates to searching. The visible neck/head stretch reflects that escalation.
-
-A promise creates a finite work window. While the caregiver remains present, the waiting allowance has not yet been spent. When away without radio support, time is consumed. Expiry produces a warning, not immediate death. Radio support or returning contact recovers the situation. Timing is data in `content/guests/027_waiting.tres`.
-
-Current searching state has no locomotion or capture. Add those only with observation-based navigation and counterplay tests. Never let a renderer, animation event or postprocessing setting decide a rule.
-
-## First-slice limits
-
-| Area | Ceiling |
+| Документ | Содержание |
 |---|---|
-| Floor | One authored corridor, staff room and resident room |
-| Residents | One complete before a second |
-| Players | Bootstrap solo; next milestone two, eventual maximum four |
-| Inventory | Three slots; initially two reusable-system item types |
-| Combat | None; eventual recovery through contact, obstacles, escape and rescue |
-| Networking | One authority, no host migration or mid-shift join in first playable coop |
-| Physics | Character movement and simple static colliders; no physical dragging, cables or destructible rooms |
-| Content generation | No runtime LLM and no procedural floor generator |
-| Progression | No currencies, shop or persistence until a shift is worth replaying |
+| [01 — Мир и сюжет](design/01-world-story.md) | Грибная аномалия, ведомство, вина бригады, арка первой главы, реплики |
+| [02 — Путь игрока](design/02-player-journey.md) | Живое меню, первый запуск, комнаты, приглашение друга, лифт, прибытие и возвращение |
+| [03 — Цикл и прогресс](design/03-loop-progression.md) | Структура смены, риск, награды, повторные дела, одиночка и кооператив |
+| [04 — Игровые системы](design/04-gameplay-coop.md) | Инвентарь, переговоры, восприятие, прятки, провал, совместные действия |
+| [05 — Первое дело](design/05-case-001.md) | Полная постановка «До отбоя»: планировка, сценарии, планшет, исходы, тесты |
+| [06 — Каталог жильцов](design/06-bestiary.md) | Восемь оригинальных номеров с историями, правилами, сигналами и контригрой |
+| [07 — UI/UX](design/07-ui-ux.md) | Экраны, состояния, управление, планшет, доступность и сообщения об ошибках |
+| [08 — Окружение и графика](design/08-environment-art.md) | Мегахрущёвки, материальность, PS1-подача, свет, модули и визуальная приёмка |
+| [09 — Звук](design/09-audio.md) | Звуковые роли, предупреждения, музыка, голос, микс и карта первого дела |
+| [Архитектура](ARCHITECTURE.md) | Фактические модули, целевые границы, сервер, загрузки, сохранения, миграция |
+| [Ассеты](ASSETS.md) | Конкретные источники, лицензии, выбор материалов, импорт и воспроизводимость |
+| [ИИ-производство](WORKFLOW.md) | Контекст по запросу, владение файлами, контракты, доказательства и участие человека |
+| [Порядок реализации](ROADMAP.md) | Этапы, зависимости, ограничения масштаба и критерии остановки |
+| [Источники](SOURCES.md) | Первичные ссылки и что именно они подтверждают |
 
-## Fairness and atmosphere
+## Что уже есть, а чего нет
 
-The staff post is reliable safety. Ordinary lamps improve observation and working conditions; they are not universal anti-monster weapons. Not every resident becomes aggressive. Numbered records never replace human motives.
+В базовом коммите есть одиночная сцена: пост, коридор, №027, два переносимых предмета, питание, радио, обещание, смена состояний и визуальное вытягивание. Есть отдельный ENet-пробник, типизированная предметная логика, тесты и упаковка Linux/macOS. Это исходный материал для дальнейшей работы, а не готовое выполнение P01.
 
-A failure must be explainable by observable information. First setbacks should permit recovery. Future hiding uses actual senses and remembered positions, not omniscient tracking. A teammate should not spend minutes holding an 'entertain resident' button; agreements create useful time windows.
+**Ещё предстоит:** живое меню, жилой хаб, полноценные игроки в общей сцене, лобби и удобное интернет-подключение, планшет, лифт, совместная загрузка, расширенное первое дело, реальные поиски/прятки/спасение, долговременный прогресс. Не выдавать наличие сетевого класса за игровой онлайн.
 
-Readable silhouettes, familiar domestic scale and restrained motion carry the horror. Keep some encounters well enough lit to see the abnormal proportions. Camera grain is seasoning, not concealment of poor art. Noise/chromatic effects must be disableable without changing difficulty.
+## Иерархия решений
 
-## Acceptance before expansion
+Текущие исходники и результаты тестов говорят, что работает сейчас. Этот индекс и профильные документы говорят, что нужно построить. Для конфликтов системы используем её единственный канонический документ: правила №027 и баланс первого дела находятся в 05; общие взаимодействия — в 04; сетевые решения — в ARCHITECTURE. Каталог не дублирует числа №027. При смене направления обновляется владеющий раздел и его тестовый контракт, а не копии во всех файлах.
 
-A new player can identify the next useful action. A failed promise is understandable and recoverable. An item cannot be duplicated or spent from another actor's inventory. Finishing requires the declared state, not just visiting an exit. Then test replay with humans: did they discuss a choice, or only repeat a sequence? No automated test can answer that last question.
+`docs/design/tuning.v0.2.json` — **предлагаемые стартовые значения для тестирования**, не runtime-конфигурация и не команда автоматически переписать `.tres`. При внедрении конкретной механики значения переносятся в типизированные ресурсы отдельной задачей с тестами. Текущие короткие интервалы bootstrap сохраняются, пока такая задача не выполнена.
+
+## Граница первой демонстрационной версии
+
+Один жилой этаж, один лифт, один короткий внешний вид здания, одно дело, один полноценно работающий жилец. Прохождение соло и вдвоём. Архитектура допускает четырёх, но фактический предел сборки показывается честно. Остальные семь жильцов — запас сценариев, а не поручение реализовать всех сразу.
+
+Нет открытого мира, публичного MMO-хаба, оружия, крафта, голода персонажа, случайной генерации планировки, непрерывной мутации любой геометрии, пользовательских скриптов или обязательных LLM/микрофона. Общий этаж — приватный экземпляр группы; «встретить других игроков» означает увидеть приглашённых участников, а не подключиться к массовому серверу.

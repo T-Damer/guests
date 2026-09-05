@@ -1,0 +1,45 @@
+name: Design documentation
+
+on:
+  push:
+    branches: [main, 'feature/**']
+    paths: ['AGENTS.md', 'docs/**', 'tools/design.py', '.github/workflows/design.yml']
+  pull_request:
+    branches: [main]
+    paths: ['AGENTS.md', 'docs/**', 'tools/design.py', '.github/workflows/design.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: design-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  design:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Validate and package design only
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python3 tools/design.py check | tee artifacts/design-check.log
+          python3 tools/design.py package | tee artifacts/design-package.log
+          git rev-parse HEAD > artifacts/design-commit.txt
+          git archive --format=zip --output=artifacts/design-source.zip HEAD
+      - name: Retain readable bundle and exact-source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: guests-design-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            build/docs/
+            artifacts/design-*
+          retention-days: 30
+          if-no-files-found: error

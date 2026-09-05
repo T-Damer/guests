@@ -1,19 +1,38 @@
-# 002 — Two people complete the same care shift
+# 002 — Два человека завершают существующую смену
 
-Status: proposed; not implemented by bootstrap.
-Dependencies: accepted 001 and one reproducible source/build baseline.
-Owned paths: networking, actor controller, integration scene and network/playthrough tests. Assign one owner to shared scene/wire IDs before parallel work.
+Статус: предложено, не реализовано документационной задачей 004.
+Зависимость: рабочая bootstrap-база и её проверки. Основной репозиторий пока содержит одиночную сцену с отдельным ENet-пробником.
 
-## Contract
+## Контекст по запросу
 
-A host and one client join before starting, see each other, perform the existing care tasks and finish one shared shift. No client-supplied success, item ownership or teleport coordinates. Server physics/observations determine action range, occlusion and care contact; no client renders a different effective rule.
+[Дизайн-индекс](../DESIGN.md), [общие системы](../design/04-gameplay-coop.md), разделы команд/репликации в [архитектуре](../ARCHITECTURE.md). Для этой задачи не требуется читать весь сюжет и каталог восьми жильцов.
 
-## Acceptance
+## Наблюдаемый результат
 
-Two real processes complete the existing work order. Simultaneous pickup has one winner. A client cannot operate a distant or wall-occluded target. Repeated/stale requests do not duplicate inventory or progress. A dropped item holder returns critical unplaced items to supply. Host departure shows a clear end state. Unsupported mid-shift joins are explicitly rejected.
+Хост и один клиент входят до начала смены, видят друг друга, выполняют текущий простой наряд и получают один общий результат. Тот же код обслуживает одного локального участника. Это базовая игровая возможность, а не необязательная доработка после добавления нового контента.
 
-Add an automated scenario with bounded latency/loss and record the actual parameters. Capture both client views for the same state. Test local look separately from authoritative movement; introduce interpolation/prediction only with evidence of the problem it solves.
+## Область изменения
 
-## Non-goals
+Сетевой адаптер, авторитетные акторы/наблюдения, текущий player controller, интеграция существующей сцены и соответствующие тесты. Один владелец общих сцен и wire-ID. Перед началом перечислить конкретные пути в рабочем контракте.
 
-No new resident, floor, shop, engine abstraction, migration, backend account system or relay vendor commitment. The current ENet fixture remains a transport test, not the final playthrough.
+## Приёмка
+
+- [ ] Два отдельных процесса завершают существующий наряд без прямых вызовов state из теста вместо игровых действий.
+- [ ] Один локальный участник проходит тот же путь.
+- [ ] Одновременный подбор лампы имеет одного победителя.
+- [ ] Дальний/закрытый стеной объект нельзя активировать.
+- [ ] Повтор или старый request не дублирует эффект и награду.
+- [ ] Выход держателя неустановленного критического предмета возвращает его в снабжение.
+- [ ] Состояния радио, питания, жильца и сдачи согласованы.
+- [ ] Потеря хоста/отказ подключения показывают понятное завершение.
+- [ ] Новый mid-shift join явно отклоняется.
+- [ ] Задержка/потери проверены с записанными параметрами и seed.
+- [ ] Интернет-подключение проверено отдельно от localhost до объявления пользовательского online.
+
+## Не менять
+
+Не добавлять второго жильца, новую большую локацию, LLM, магазин, procedural generation, постоянную глобальную экономику или свой ECS. Хаб, лифт и полный учебный сценарий v0.2 идут следующими этапами, а не расширяют эту задачу неявно. Не переносить предложенные значения из tuning JSON в текущую care-конфигурацию попутно.
+
+## Доказательства
+
+Точный SHA, команды, журналы двух процессов, захваты двух клиентов для одного состояния, экспортированный клиент. Пробник протокола остаётся полезным регрессионным тестом, но не заменяет конечный совместный сценарий.

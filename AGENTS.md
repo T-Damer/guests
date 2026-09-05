@@ -1,28 +1,33 @@
 # GUESTS — agent entry point
 
-Read `README.md`, `docs/DESIGN.md`, `docs/ARCHITECTURE.md` and the active task before editing. Full workflow: `docs/WORKFLOW.md`; art intake: `docs/ASSETS.md`.
+PC-first Godot 4.7.2, typed GDScript, PS1-inspired domestic horror. The product is cooperative (target 1–4), with a complete solo path. Existing bootstrap is still solo plus a separate ENet probe: do not call it playable online.
 
-## Scope
-- PC-first Godot, typed GDScript, PS1-inspired restrained realism; not a browser game or a reusable engine.
-- One floor, one resident, one complete care shift first. No combat, procedural floor generator, live LLM dialogue or bespoke ECS.
-- Keep human habits and readable warnings. Light is useful; the staff post stays safe.
+## Read on demand
+Read the active task, inspect current code/tests and use `docs/DESIGN.md` as the index. Do not load the entire design library into every task. Architecture: `docs/ARCHITECTURE.md`; production rules: `docs/WORKFLOW.md`; assets: `docs/ASSETS.md`; milestones: `docs/ROADMAP.md`.
+- Resident 027 / first case: `docs/design/05-case-001.md` (canonical rules).
+- Hub, menu, elevator: `02-player-journey.md` and `07-ui-ux.md` under `docs/design/`.
+- Inventory/cooperation: `docs/design/04-gameplay-coop.md` and relevant architecture sections.
+- Art/audio/story: only the corresponding numbered design document and owned assets.
+`docs/design/tuning.v0.2.json` is a proposal, NOT runtime input. Design describes targets, code/evidence describe what exists. Do not silently implement the whole bible.
+
+## Hard boundaries
+One hub floor, one lift, one short arrival view, one case and one complete resident first. No combat, parkour, procedural city, public MMO hub, bespoke ECS, runtime LLM or required microphone. The staff floor stays safe. Rules are readable and consistent; at least one solution works solo. Extra dossiers are backlog, not parallel implementation tasks.
 
 ## Change discipline
-1. Inspect the working tree, branches, open PRs and existing implementations. Never overwrite another contributor's work.
-2. Search -> reuse -> extend -> compose -> create. One task, explicit owned paths, small reviewable commits.
-3. Maximum five branches total and three open PRs. `main` integrates; `stable` publishes verified builds. Start with one feature branch and one PR. No force pushes, automatic merging or release promotion.
-4. One integration owner. Parallel writers require disjoint files. Shared scenes, project settings and wire contracts have one writer.
-5. Typed inputs/outputs. Gameplay IDs, thresholds, durations and budgets live in named definitions, not anonymous literals. Do not wrap structural zero/one or every local layout coordinate in meaningless constants.
-6. Domain rules have no scene tree, clock, input, renderer or networking dependencies. Inject elapsed time. Separate immutable definitions, per-instance state and presentation.
-7. The server decides shared outcomes. Clients request intentions. Validate sender, type, distance, inventory, rate and phase. Never accept client-reported successful outcomes or teleport positions.
-8. Use Godot's built-ins before new dependencies. Pin tools and addons; request an architecture decision for a new runtime dependency.
-9. Every imported asset needs provenance, license, version and checksum. No ripped game assets, unlicensed videos, logos or copied K.O.N.T.U.R./SCP lore. Generated proxies must be labelled honestly.
-10. Gameplay changes require success and failure tests; network changes require multiple processes. Never weaken a test to make a build green.
-11. Visual work requires a rendered scene/capture; audio needs a listening check. A headless pass proves neither appearance, sound, fun nor frame rate.
-12. Never report unrun checks as passed. Report exact commit, commands, outcomes, evidence and remaining gaps. Do not expose credentials or include them in logs/artifacts.
+1. Inspect worktree, remote head, branches, open PRs and existing solutions. Preserve human edits. Search -> reuse -> extend -> compose -> create.
+2. One explicit task with owned paths, non-goals and observable acceptance. Maximum two parallel writers with disjoint files; shared scenes/settings/wire contracts have one owner.
+3. At most five branches and three open PRs. Bootstrap uses one feature branch and PR. `main` integrates; `stable` publishes separately approved verified commits. No force push, silent overwrite, auto-merge or stable promotion.
+4. Typed interfaces; named gameplay IDs, durations and thresholds. Do not invent meaningless constants for structural zero/one or every blockout coordinate.
+5. Domain has no scene tree, input, clock, renderer or transport dependency. Inject time/observations. Separate shared immutable Resources, instance state and presentation.
+6. One authoritative simulation for solo/online. Clients request intentions; validate sender, phase, version, IDs, rate, distance, occlusion and inventory. Repeated requests cannot repeat outcomes.
+7. Visual deformation does not implicitly scale physics. Graphics/audio settings do not change perception rules. Animations show outcomes; they do not decide authority.
+8. Prefer built-ins and existing code; new runtime dependencies need an explicit architecture decision. Pin tools. No duplicated Node.js game server.
+9. Imported assets require actual provenance/license/version/checksums. No ripped game/video assets or copied canon. Mark proxies honestly; never fabricate hashes for shortlisted assets.
+10. Test success, failure and boundary cases. Network work needs separate processes and a real duo playthrough before online claims. Never weaken tests merely to pass.
+11. Visual work needs runtime captures and inspection; audio needs listening. Headless/Dummy passes prove neither appearance, sound, fun nor FPS.
+12. Report exact SHA, commands, evidence, PASS/FAIL/NOT RUN and remaining gaps. Never disclose credentials or upload private user data.
 
-## Human / AI handoff
-The AI implements, tests, documents deltas and proposes a PR. A human can edit ordinary scenes and resources, chooses artistic direction and approves merges/releases. Preserve editor-authored work; keep `.godot/`, binaries and temporary captures out of Git.
+## Commands and handoff
+`python3 tools/dev.py check` — current game checks; `capture` — rendered fixtures; `export` — Linux. `python3 tools/package.py all` — standalone packages. `python3 tools/design.py check` / `package` — design validation/export, not gameplay verification.
 
-## Standard commands
-`python3 tools/dev.py check` runs import, structural, rule, scene-interaction and two-process ENet checks. `capture` renders fixtures; `export` builds and smoke-launches Linux. Current task: `docs/tasks/001-bootstrap.md`; proposed next task: `002-coop.md`. The main scene is currently solo; the separate transport probe does not prove full playable coop.
+Human editors use ordinary scenes/Resources and art sources. Agents implement, verify, document deltas and update the same PR; humans retain creative and merge/release approval. Track `.gd.uid`/shader UIDs, not `.godot/` or generated vendor caches. Next gameplay contract: `docs/tasks/002-coop.md`.

@@ -1,33 +1,147 @@
-# Architecture and ownership
+# Архитектура GUESTS — контракты v0.2
 
-## Current modules
+[Карта дизайна](DESIGN.md) · [Производство](WORKFLOW.md) · [Порядок реализации](ROADMAP.md).
 
-`game/domain/` contains typed RefCounted state and a Resource definition. It knows neither scene nodes nor clocks, devices, networking or presentation. `CareState.tick` receives elapsed time and observations. `ShiftState` owns unique items and per-actor inventories. Snapshot arrays are copied. `GuestProfile` is shared immutable configuration, never instance state.
+## 1. Фактическая основа и целевое состояние
 
-`game/presentation/` translates input into intentions and domain state into mesh/light/audio/UI changes. `main.gd` currently orchestrates the **solo** scene, including range/line-of-sight checks. Scene nodes and `.tres` files remain editable in Godot. The wall module exposes dimensions to the editor and creates only its own internal meshes/shapes; do not scale physics bodies or hand-edit those generated internals.
+Проверенная исходная база: `39b90c3d08b13d7891a71ced6a63f6792e961b08`. Движок закреплён в `.godot-version`: Godot 4.7.2 stable. Код игры — типизированный GDScript. Renderer — Compatibility. Дев-инструменты — Python 3.11+ standard library. Эти документы не обновляют движок и не добавляют runtime-зависимости.
 
-`game/network/NetSession` is a separate server-authoritative ENet adapter. Peers send action IDs; sender identity comes from the transport. Unknown actions, excessive requests and absent/false reach validators are rejected. The authority owns the state and inventories. Disconnect returns unplaced critical items to their supply points. The two-process test checks this transport contract. **The adapter is not yet wired to player locomotion or the solo scene.**
+| Уже существует | Что это реально делает | Чего это не доказывает |
+|---|---|---|
+| `game/domain/CareState`, `ShiftState`, `InventoryState` | Правила ухода, состояния, уникальные предметы | Полную модель всех будущих жильцов |
+| `GuestProfile` и `content/guests/027_waiting.tres` | Типизированное описание №027 | Финальный учебный баланс v0.2 |
+| `game/presentation/main.gd`, сцены | Одиночный прототип с лучевыми интеракциями | Игровой кооператив, хаб или планшет |
+| `game/network/net_session.gd` | Отдельный ENet-адаптер и серверная обработка действий | Репликацию тел и настоящее прохождение вдвоём |
+| `tests/` | Правила, сценовые фикстуры и сетевой пробник | Человеческое прохождение, удовольствие, целевой FPS |
+| `tools/dev.py`, `tools/package.py` | Подготовку, проверки, экспорт и упаковку | Подписанный публичный релиз или автоматически работающий relay |
 
-`tests/` uses a small native assertion runner and an ENet fixture, not a custom test framework. GdUnit4 can be considered when fixtures/doubles justify a pinned dependency. Do not vendor a test addon merely because it was mentioned during brainstorming.
+Не создаём новую игру рядом со старой. Поэтапно заменяем одиночную координацию общей сессией, сохраняя тестируемые правила и сцену как регрессионный материал. Папки и классы будущей схемы ниже **предлагаются**, а не уже существуют.
 
-`tools/` is Python 3.11+ standard-library development tooling. It is not part of the game or its future server. No Node.js backend or duplicate rules implementation.
+## 2. Зафиксированные решения
 
-## Decisions
+**ADR-001 — PC-first, Godot и Compatibility.** PS1-подобный реализм с локальным динамическим светом. Нет обязательных сложных GI/volumetric эффектов. Переключение renderer требует измеренной причины, собственного ADR, сравнения кадров и повторной проверки Linux/macOS. Особенности renderers: [G04](SOURCES.md).
 
-**ADR-001 — Compatibility for the first PS1 preset.** PC-first Godot 4.7.2 stable, typed GDScript, real-time local lighting/shadows; no dynamic GI requirement. Compatibility keeps this narrow lighting workload and software-rendered checks simple. Forward+ was considered for realism but is not needed to prove this game loop. Revisit only with a measured visual requirement and target-hardware evidence. This does not promise browser support: ENet is not a browser transport.
+**ADR-002 — Не создавать свой движок.** Композиция обычных Node/Scene/Resource, сигналы по месту ответственности, RefCounted для правил. Нет обязательного ECS, глобального event-bus для каждого события, собственного редактора сцен или языка описания всей игры.
 
-**ADR-002 — No bespoke ECS/event-bus framework.** Prefer Godot nodes/signals/resources, pure state where it improves testing, and direct explicit coordination for this small slice.
+**ADR-003 — Одна авторитетная симуляция.** Solo, listen-host и будущий headless-host используют одинаковые правила. Клиент передаёт намерение; сервер решает результат. Локальный UI не определяет успешность предмета, обещания или завершения миссии.
 
-**ADR-003 — Deformation is presentation-only.** The resident's neck/head move; interaction anchors and collision do not scale implicitly. Future navigation must account explicitly for maximum silhouettes and traversal states.
+**ADR-004 — Данные определения не равны состоянию экземпляра.** Resources содержат параметры/описания; изменяемые таймеры, связи и инвентари находятся в instance-state. Загруженные ресурсы могут разделяться Godot между потребителями, поэтому не храним в общем `.tres` тревогу конкретной Анны [G02](SOURCES.md).
 
-**ADR-004 — Reproducible asset resolution.** Six approved GLBs are resolved from one SHA-256-pinned CC0 archive. Cache/vendor folders are generated and ignored. Exported games contain the resolved resources and need no network. Keep modified source art outside vendor with new provenance.
+**ADR-005 — Масштаб сцен ограничен.** Menu, Hub, Transit, Case — отдельные этапы. Далёкие мегахрущёвки не симулируются как тысячи квартир. Нет бесшовного открытого мира и runtime-генератора планировок.
 
-## Next network boundary
+**ADR-006 — Визуальная мутация отделена от физики.** Скелет/меш меняют позу; коллизия и проходимость обновляются только явным подтверждённым состоянием. Не масштабировать корневой physics body вместе с шеей [G06](SOURCES.md).
 
-Do not expose `main.gd` state setters to clients. Next implement authoritative actors, server-observed range/occlusion and synchronized interactable states, then camera-only local look and measured prediction/interpolation. Server time drives care. UI and audio react to confirmed state. Scope joins to the lobby before the shift; cleanly reject unsupported mid-shift joining.
+**ADR-007 — Контент воспроизводим.** Известный источник, лицензия, версия/архив, хэши, исходник/рецепт, GLB и тестовая сцена. Игра не скачивает новые материалы при старте. Подготовка ассетов выполняется отдельно от runtime.
 
-Before calling coop playable: two actual clients complete the shift, simultaneous pickup resolves once, out-of-range/occluded/spoofed actions fail, repeated packets do not repeat outcomes, host exit is explicit, a disconnected item holder cannot soft-lock progress, and latency/loss cases have evidence.
+**ADR-008 — Кооператив — release gate.** Одиночная сцена допустима как промежуточный материал. Первое пользовательское демо нового цикла не считается завершённым без реального прохождения с другом, включая интернет-подключение по выбранному маршруту.
 
-## File ownership
+## 3. Целевые границы модулей
 
-The integration owner owns `project.godot`, shared scenes, wire enums, manifest structure and workflows. A behavior task owns the relevant domain file/profile/tests; an art task owns its isolated source/model/material and preview scene. Shared-file edits are serialized. Never parallel-write a `.tscn` or silently regenerate over a human's edits.
+```text
+App / UI navigation
+          |
+SessionCoordinator ── transport (ENet / выбранный адаптер подключения)
+          |
+Authoritative simulation
+ ├─ Actor state + server movement
+ ├─ Interaction service + inventories
+ ├─ Resident care / perception / commitments
+ ├─ Equipment / power state
+ └─ Case goals + session phase
+          |
+Confirmed state / event sequence
+          |
+Client presentation: actors, animation, light, audio, tablet, HUD
+          |
+Save boundary: confirmed result → host campaign / local profile receipt
+```
+
+Границы важнее названий классов. Не нужно заранее создавать все менеджеры с пустыми методами. Модуль появляется, когда имеет конкретную задачу и проверку. Один элемент не должен одновременно владеть UI, физикой, сериализацией кампании и сетевым транспортом.
+
+Предлагаемая раскладка сохраняет `game/domain`, `game/network`, `game/presentation`. При фактическом росте добавляются `game/session`, `game/ui`, `game/scenes/hub`, `game/scenes/cases` и определения в `content/cases`, `content/items`, `content/guests`. Не переносить старые файлы ради косметической чистоты одновременно с новой сетевой механикой.
+
+## 4. Что остаётся в domain
+
+Состояния жильца и обязательств, условия инвентаря, дискретная электрика, цели наряда, переходы этапов и расчёт результата. Входы явные: прошедшее время, наблюдение, намерение, подтверждённый доступный предмет. Никаких обращений к `Input`, `Time`, `RenderingServer`, `AudioServer`, scene tree или сети.
+
+Пример: `support_present` вычисляет наблюдатель мира, а `care.tick` решает, как оно влияет на жильца. Визуальный свет не передаёт обратно результат «сейчас страшно». Таймеры вводятся через delta/tick с валидацией. Повторяемый seed принадлежит делу, а не случайно выбирается каждым клиентом.
+
+Логику радио и теста цепи не зашиваем в универсальный «монстр-менеджер». Оборудование сообщает подтверждённую доступность поддержки; care-state реагирует. Тогда другой жилец может использовать то же оборудование иначе без дублирования электрической схемы.
+
+## 5. Команды и идентификаторы
+
+У сущности есть стабильный ID в рамках дела; у экземпляра предмета — уникальный item ID; у операции — request ID. Сетевой адрес узла Godot не является постоянным ID сохранения. Имена пользователей не используются как ключ авторитета.
+
+Предлагаемый конверт команды: `protocol_version`, `session_id`, `case_epoch`, `request_id`, `action_id`, `entity_id`, ограниченный типизированный payload. Это описание контракта, не готовый wire-формат bootstrap. Sender берётся из соединения, а не из поля `actor_id`, присланного клиентом.
+
+Проверка на сервере: совместимость версии/этапа; допустимый отправитель; известные ID; лимит частоты/размера; свежесть request; расстояние и препятствия; доступность цели; инвентарь; предусловия правила. Отказ возвращает стабильный код, который UI локализует. Не передавать произвольные пути к ресурсам, скрипты, Object или сериализованный код.
+
+Идемпотентность: повтор принятого request возвращает тот же outcome и не повторяет эффект. Новое осмысленное действие имеет новый request ID. Например, радио может переключаться снова по новой команде, но повтор доставки старой не возвращает его обратно. Кэш результатов ограничен по размеру и lifetime сессии.
+
+Список действий bootstrap append-only при совместимых изменениях; при несовместимости явно повышаем протокол. Не переставлять enum «ради красоты», изменяя смысл старых сохранений и пакетов.
+
+## 6. Движение и репликация
+
+Сервер владеет положением, столкновениями и допустимым темпом движения. Клиент передаёт ограниченный ввод/направление, не готовую телепортацию. Камера локальна. Для отзывчивости вводятся предсказание и согласование после того, как подтверждена базовая авторитетная модель; простое принятие любой клиентской позиции не называется prediction.
+
+Положение удалённых игроков интерполируется. Состояния предметов, наряда, дверей и обещаний передаются надёжно; часто обновляемое движение использует подходящий отдельный канал и последовательность. Не отправлять полную энциклопедию и все текстуры в каждом snapshot.
+
+Точный tick rate и частота snapshots выбираются по сетевому тесту и фиксируются в конфигурации. До такого теста цифры не объявляются оптимальными. Спам-команда не заставляет сервер публиковать огромный snapshot без ограничений каждому клиенту.
+
+Ключевые библиотеки/API multiplayer подтверждаются документацией Godot [G01](SOURCES.md), но готовую архитектуру игры они не создают автоматически. Текущий ENet-пробник нужно расширить, а не выдать за завершённое решение.
+
+## 7. Интернет-подключение
+
+Фиксируем ENet для native-игры. LAN/direct-IP — первый технический путь. Он не равен гарантированному подключению через любой NAT: требуются доступный UDP-порт либо отдельная инфраструктура [G01](SOURCES.md).
+
+До внешнего демо отдельный ADR выбирает доставку: проверенный relay/платформенное приглашение либо публичный Godot-headless сервер для закрытого теста. Выбор зависит от распространения и доступного хостинга; этот документ не устанавливает SDK, не создаёт платный сервер и не обещает уже существующие коды приглашений. Самописный NAT traversal и новый аккаунтный backend не вводятся только ради вида готового меню.
+
+Неизменяемый приёмочный критерий: два человека на разных сетях действительно подключаются по документированному способу, проходят дело и получают понятный результат при разрыве. Пока этот тест не пройден, интерфейс прямого подключения честно обозначается техническим.
+
+## 8. Фазы сессии и загрузка
+
+Целевая машина: `HUB → READY_CHECK → TRANSIT → LOADING_CASE → CASE_ACTIVE → EXTRACTING → DEBRIEF → HUB`, а также `ABORTING` и `DISCONNECTED`. Локальное главное меню не является сетевой фазой.
+
+Перед отправлением фиксируются roster, версия контента и `case_epoch`. Каждый участник загружает нужную сцену, подтверждает готовность и только после серверного `start` включает симуляцию. Смена состава сбрасывает ready-check. Игрок не может начать жить на объекте, пока товарищ ещё на чёрном экране.
+
+Background loading Godot позволяет запрашивать загрузку ресурса отдельно от основного потока [G03](SOURCES.md). Готовую сцену подключаем в безопасной точке жизненного цикла, не произвольно меняем scene tree из worker-потока. Художественная поездка не гарантирует окончания загрузки; есть реальный fallback UI и таймаут.
+
+При отказе до старта группа возвращается в хаб без расхода комплекта. После старта отключённый участник удаляется из активного состава с recovery критических предметов. Mid-shift join, reconnect-in-place и host migration откладываются. Соло не выполняет сетевые ожидания отсутствующих участников.
+
+## 9. Сохранения и прогресс
+
+Разделяем `CampaignState` хоста, `PlayerProfile` конкретного устройства и временный `SessionState`. Кампания хранит пройденные дела, исходы, отношения и доступы; профиль — настройки, выбранного сотрудника и личные отметки; сессия — текущих участников, оборудование и незавершённые действия.
+
+Первая реализация сохраняет безопасные границы: перед выездом и после подтверждённого разбора. Непрерывное сохранение каждого объекта посреди дела не требуется. Solo pause отличается от сохранения; закрытие во время дела возвращает к безопасной точке, об этом предупреждают.
+
+Файл имеет schema version, ID кампании, timestamp и содержимое проверенной структуры. Запись — во временный файл, проверка и замена с резервной предыдущей копией. Ошибка не затирает старое сохранение. Миграция версии тестируется на fixture-файлах; неизвестный формат не интерпретируется через произвольный `str_to_var` с объектами.
+
+Результат дела получает уникальный ID. Повторная выдача receipt не дублирует прогресс. У гостя отмечается участие, но его собственная кампания не переписывается выбором чужого хоста. Без централизованной учётной системы локальные профили не являются защищённой от читов глобальной экономикой; такую гарантию не заявляем.
+
+## 10. UI, звук и анимация
+
+UI получает view-model подтверждённого состояния и отдельно локальные настройки/наблюдения. Диалоговое окно не самостоятельно расходует предмет. Анимация не обязана закончиться, чтобы сервер принял согласованное правило; опасное действие отменяется по state, а не по последнему кадру успокоения.
+
+Звук оборудования не перезапускается на каждом snapshot. Одно событие имеет sequence ID, клиент запоминает обработку. Сенсорная слышимость не зависит от Master Volume. Шейдер камеры, разрешение и gamma не меняют границу безопасной зоны.
+
+Визуальные и звуковые побочные эффекты при выгрузке сцены освобождаются. Существующие предупреждения об удержанных WAV/playback-объектах остаются открытой задачей, пока не устранены и не проверены, а не исчезают от новой формулировки документа.
+
+## 11. Автоматизированные сценарии
+
+Доменные тесты проверяют переходы, отрицательные случаи, повтор команды и разделение состояния. Сценовые — реальные лучи, коллизии, reachable anchors и связи UI-сигналов. Сетевые — два отдельных процесса и реальные команды, не две ссылки на один объект.
+
+Следующие обязательные сетевые сценарии: одновременный подбор, действие сквозь стену/издалека, повтор результата, старый epoch, выход с предметом, разрыв у лифта, отмена загрузки, потеря хоста, два завершения одного дела. Соло и duo имеют законченный сценарий от хаба до хаба.
+
+В инженерном тесте задаются воспроизводимые задержка и потери, например RTT 150 мс и 2% потерь как начальная стресс-точка, не обещание поддерживать любой плохой интернет. Фиксируются параметры, seed, фактический способ эмуляции и результат. Нельзя называть тест сетевым стрессом только потому, что два процесса запущены на одном компьютере.
+
+## 12. План миграции без большого переписывания
+
+Сначала проверить существующую базу. Затем дать существующему `ShiftState` одного владельца сессии и подключить два тела; сохранить старые доменные тесты. После этого добавить транзакционные действия/request ID, общие snapshots и наблюдение. Затем UI подключения и хаб. Потом лифт/загрузка. Затем данные расширенного дела, планшет и финальные ассеты.
+
+Выносить `main.gd` по мере появления фактических обязанностей. Не создавать десятки пустых «Manager» перед первой рабочей сценой. Не добавлять второго жильца, пока первый не завершает общий цикл.
+
+## 13. Владение и выпуск
+
+Один интегратор владеет общими сценами, `project.godot`, wire-форматом и workflows. Параллельные задачи требуют непересекающихся файлов. Игровой код, контент и редакторские настройки проверяются на конкретном SHA.
+
+`main` — интеграция. `stable` — отдельно одобренная проверенная версия. Linux/macOS packaging остаётся существующей командой; новый дизайн её не меняет. Подпись ad-hoc не называется нотариальным одобрением Apple. Просмотр исходников/пробный headless-запуск не заменяет графический запуск финального пакета.
