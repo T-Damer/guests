@@ -1,0 +1,75 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/guest_view.gd" id="1"]
+[sub_resource type="StandardMaterial3D" id="Cloth"]
+albedo_color = Color(0.24, 0.29, 0.26, 1)
+roughness = 1.0
+[sub_resource type="StandardMaterial3D" id="Skin"]
+albedo_color = Color(0.55, 0.56, 0.43, 1)
+roughness = 1.0
+[sub_resource type="StandardMaterial3D" id="Dark"]
+albedo_color = Color(0.035, 0.033, 0.025, 1)
+[sub_resource type="BoxMesh" id="Body"]
+size = Vector3(0.46, 0.58, 0.32)
+material = SubResource("Cloth")
+[sub_resource type="BoxMesh" id="Arm"]
+size = Vector3(0.09, 0.52, 0.1)
+material = SubResource("Cloth")
+[sub_resource type="BoxMesh" id="Leg"]
+size = Vector3(0.14, 0.55, 0.16)
+material = SubResource("Cloth")
+[sub_resource type="BoxMesh" id="Eye"]
+size = Vector3(0.043, 0.025, 0.025)
+material = SubResource("Dark")
+[sub_resource type="CylinderMesh" id="NeckMesh"]
+top_radius = 0.072
+bottom_radius = 0.085
+height = 0.22
+radial_segments = 8
+material = SubResource("Skin")
+[sub_resource type="SphereMesh" id="HeadMesh"]
+radius = 0.16
+height = 0.43
+radial_segments = 8
+rings = 4
+material = SubResource("Skin")
+[sub_resource type="BoxMesh" id="Hands"]
+size = Vector3(0.23, 0.08, 0.11)
+material = SubResource("Skin")
+
+[node name="Guest" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.0, 0)
+mesh = SubResource("Body")
+[node name="Neck" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.39, 0)
+mesh = SubResource("NeckMesh")
+[node name="Head" type="Node3D" parent="."]
+position = Vector3(0, 1.64, 0)
+[node name="Mesh" type="MeshInstance3D" parent="Head"]
+mesh = SubResource("HeadMesh")
+[node name="LeftEye" type="MeshInstance3D" parent="Head"]
+position = Vector3(-0.063, 0.03, -0.142)
+mesh = SubResource("Eye")
+[node name="RightEye" type="MeshInstance3D" parent="Head"]
+position = Vector3(0.063, 0.03, -0.142)
+mesh = SubResource("Eye")
+[node name="LeftArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.28, 0.83, -0.1)
+rotation = Vector3(-0.25, 0, -0.13)
+mesh = SubResource("Arm")
+[node name="RightArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.28, 0.83, -0.1)
+rotation = Vector3(-0.25, 0, 0.13)
+mesh = SubResource("Arm")
+[node name="Hands" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.65, -0.3)
+mesh = SubResource("Hands")
+[node name="LeftLeg" type="MeshInstance3D" parent="."]
+position = Vector3(-0.14, 0.34, -0.15)
+mesh = SubResource("Leg")
+[node name="RightLeg" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 0.34, -0.15)
+mesh = SubResource("Leg")
